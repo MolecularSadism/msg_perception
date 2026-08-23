@@ -17,7 +17,11 @@
 //! [`MemoryDigest<P>`] is an optional companion component holding a per-type
 //! summary of a [`Memory<P>`] (strongest value/location/source and totals per
 //! percept type), rebuilt each frame by [`MemoryDigestPlugin<P>`] so host
-//! systems can read a summary instead of iterating raw entries.
+//! systems can read a summary instead of iterating raw entries. The digest
+//! reflects memory as of [`PerceptionSystems::Digest`] — after decay and
+//! propagation — so read it `.after(PerceptionSystems::Digest)`; memory
+//! mutations landing later in the frame (e.g. from [`PerceptionEvent<P>`]
+//! observers) show up one frame later.
 //!
 //! ## Source tracking
 //!
