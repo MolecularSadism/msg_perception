@@ -12,6 +12,13 @@
 //! - **[`PerceptionEvent<P>`]** (entity-targeted): Direct stimulus fired via `trigger` on a
 //!   specific entity, no distance attenuation.
 //!
+//! ## Per-type digest
+//!
+//! [`MemoryDigest<P>`] is an optional companion component holding a per-type
+//! summary of a [`Memory<P>`] (strongest value/location/source and totals per
+//! percept type), rebuilt each frame by [`MemoryDigestPlugin<P>`] so host
+//! systems can read a summary instead of iterating raw entries.
+//!
 //! ## Source tracking
 //!
 //! Both stimulus paths carry an optional `source` entity that identifies who
@@ -48,8 +55,10 @@ use std::marker::PhantomData;
 
 use bevy::prelude::*;
 
+mod digest;
 mod propagation;
 
+pub use digest::{MemoryDigest, MemoryDigestPlugin, PerceptDigest, update_memory_digest};
 pub use propagation::{PropagationScratch, propagate_perception};
 
 // ─── Percept trait ───────────────────────────────────────────────────────────
@@ -288,6 +297,8 @@ pub enum PerceptionSystems {
     Decay,
     /// Broadcast message propagation.
     Propagate,
+    /// Per-type memory digest rebuild (after decay and propagation).
+    Digest,
 }
 
 // ─── Systems ─────────────────────────────────────────────────────────────────
@@ -377,8 +388,9 @@ impl<P: Percept> Plugin for PerceptionPlugin<P> {
 
 pub mod prelude {
     pub use crate::{
-        LocationKnowledge, Memory, MemoryEntry, Percept, PerceptionConfig, PerceptionEvent,
-        PerceptionMessage, PerceptionPlugin, PerceptionSystems,
+        LocationKnowledge, Memory, MemoryDigest, MemoryDigestPlugin, MemoryEntry, Percept,
+        PerceptDigest, PerceptionConfig, PerceptionEvent, PerceptionMessage, PerceptionPlugin,
+        PerceptionSystems,
     };
 }
 
