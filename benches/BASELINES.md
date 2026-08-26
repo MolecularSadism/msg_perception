@@ -4,7 +4,7 @@ Criterion baseline `base`, captured 2026-08-26.
 
 | | |
 |---|---|
-| Commit | `429d3789405d` |
+| Commit | `c05a5f5a5878` |
 | Branch | `claude/memory-digest` |
 | Toolchain | rustc 1.98.0 (88d9e12ae 2026-08-18) |
 | Host | Linux x86_64 container (shared/virtualised) |
@@ -25,12 +25,32 @@ Mean with 95% confidence interval.
 
 ## Reproducing
 
+The bench target must be named. A bare `cargo bench` also runs the lib test
+harness, which rejects criterion's flags with
+`error: Unrecognized option: 'baseline'`.
+
 ```sh
-cargo bench -- --save-baseline base   # capture
-cargo bench -- --baseline base        # compare against it
+# capture
+cargo bench --bench perception_scaling -- --save-baseline base
+cargo bench --bench memory_digest -- --save-baseline base
+
+# compare against it
+cargo bench --bench perception_scaling -- --baseline base
+cargo bench --bench memory_digest -- --baseline base
 ```
 
-These were taken in a shared virtualised container, so absolute figures carry
-more run-to-run noise than a dedicated machine. Comparisons made with
-`--baseline base` on the same host are meaningful; comparing these absolute
-numbers against a different machine is not.
+## How much to trust these
+
+Taken in a shared virtualised container. Treat them as an order-of-magnitude
+record, not a regression gate.
+
+Re-running `take_batch/3x1000_pending` on byte-identical code about an hour
+later on the *same* host reported `+31%` with `p = 0.00`. Criterion's
+significance test measures sampling noise within a run; it cannot see the
+host's load drifting between runs. So a reported change of this size here is
+not evidence of a real regression.
+
+To draw a conclusion from a comparison, capture the baseline and the
+comparison back to back in one sitting, and treat anything under roughly
+1.5x as inconclusive. Comparing these absolute numbers against a different
+machine is meaningless.
