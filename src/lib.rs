@@ -97,7 +97,16 @@ impl<
 // ─── Configuration ───────────────────────────────────────────────────────────
 
 /// Resource controlling memory decay and capacity.
+///
+/// With the `serde` feature enabled the config derives `Serialize`/
+/// `Deserialize` with per-field defaults, so host apps can embed it in their
+/// own config assets.
 #[derive(Resource, Clone, Debug)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(default)
+)]
 pub struct PerceptionConfig {
     /// How fast memory values decay per second.
     pub decay_rate: f32,
@@ -979,5 +988,39 @@ mod tests {
             .unwrap();
         let entry = memory.strongest().unwrap();
         assert_eq!(entry.source, Some(attacker));
+    }
+}
+
+#[cfg(all(test, feature = "serde"))]
+mod serde_tests {
+    use super::*;
+
+    #[test]
+    fn config_round_trips_through_ron() {
+        let config = PerceptionConfig {
+            decay_rate: 3.0,
+            min_threshold: 0.25,
+            max_count: 32,
+            merge_radius: 1.5,
+        };
+
+        let ron = ron::to_string(&config).unwrap();
+        let back: PerceptionConfig = ron::from_str(&ron).unwrap();
+
+        assert_eq!(back.decay_rate, config.decay_rate);
+        assert_eq!(back.min_threshold, config.min_threshold);
+        assert_eq!(back.max_count, config.max_count);
+        assert_eq!(back.merge_radius, config.merge_radius);
+    }
+
+    #[test]
+    fn config_fills_missing_fields_with_defaults() {
+        let partial: PerceptionConfig = ron::from_str("(decay_rate: 2.0)").unwrap();
+        let defaults = PerceptionConfig::default();
+
+        assert_eq!(partial.decay_rate, 2.0);
+        assert_eq!(partial.min_threshold, defaults.min_threshold);
+        assert_eq!(partial.max_count, defaults.max_count);
+        assert_eq!(partial.merge_radius, defaults.merge_radius);
     }
 }

@@ -10,9 +10,14 @@ categories = ["game-development"]
 
 [dependencies]
 bevy = { version = "0.18", default-features = false }
+serde = { version = "1", features = ["derive"], optional = true }
+
+[features]
+serde = ["dep:serde"]
 
 [dev-dependencies]
 criterion = { version = "0.5", features = ["html_reports"] }
+ron = "0.12"
 
 [[bench]]
 name = "perception_scaling"

@@ -46,6 +46,8 @@ app.insert_resource(PerceptionConfig {
 });
 ```
 
+With the `serde` feature enabled, `PerceptionConfig` derives `Serialize`/`Deserialize` with per-field defaults, so host apps can embed it in their own config assets instead of shadowing its fields.
+
 ## Propagation
 
 `propagate_perception` resolves every broadcast of a frame against every `Memory` holder, so its cost grows with the product of the two. Three reductions keep that in hand:
