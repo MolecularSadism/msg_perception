@@ -12,6 +12,7 @@ Environmental stimuli are stored as `MemoryEntry<P>` values inside a `Memory<P>`
 - **Configurable decay** — per-frame value reduction with a minimum threshold for removal
 - **Source tracking** — both stimulus paths carry an optional source entity
 - **Batched propagation** — same-frame broadcasts sharing a percept, source, range and origin collapse into one memory, and a per-frame uniform grid keeps a busy scene from paying the full message × perceiver product
+- **Per-type digest** — an optional `MemoryDigest<P>` companion component summarizes a memory per percept type (strongest entry's value, location and source, plus totals) so host systems read a summary instead of iterating raw entries
 
 ## Usage
 
@@ -45,6 +46,8 @@ app.insert_resource(PerceptionConfig {
 });
 ```
 
+With the `serde` feature enabled, `PerceptionConfig` derives `Serialize`/`Deserialize` with per-field defaults, so host apps can embed it in their own config assets instead of shadowing its fields.
+
 ## Propagation
 
 `propagate_perception` resolves every broadcast of a frame against every `Memory` holder, so its cost grows with the product of the two. Three reductions keep that in hand:
@@ -57,15 +60,21 @@ Culling and grid lookup only skip pairs the exact per-pair check would have reje
 
 `cargo bench --bench perception_scaling` measures the pass over perceiver and message counts in {100, 1000}.
 
+## Per-type digest
+
+Add `MemoryDigestPlugin::<MyPercept>::default()` alongside the perception plugin and spawn a `MemoryDigest<MyPercept>` next to each `Memory<MyPercept>` that should be summarized. The digest is rebuilt under `PerceptionSystems::Digest`, after decay and propagation, and the component is only written when the summary differs, so `Changed<MemoryDigest<P>>` stays a meaningful filter for host systems.
+
+`cargo bench --bench memory_digest` measures the summary rebuild, with and without map reuse.
+
 ## System scheduling
 
-The plugin exposes `PerceptionSystems::Decay` and `PerceptionSystems::Propagate` set labels so the host app can order its own systems relative to perception processing.
+The plugin exposes `PerceptionSystems::Decay`, `PerceptionSystems::Propagate` and `PerceptionSystems::Digest` set labels so the host app can order its own systems relative to perception processing.
 
 ## Bevy compatibility
 
 | `msg_perception` | Bevy   |
 |-----------------|--------|
-| 0.1, 0.2        | 0.18   |
+| 0.1 – 0.3       | 0.18   |
 
 ## License
 
