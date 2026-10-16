@@ -1,6 +1,6 @@
 [package]
 name = "msg_perception"
-version = "0.3.0"
+version = "0.4.0"
 edition = "2024"
 license = "MIT OR Apache-2.0"
 description = "Generic perception and memory system for Bevy."
@@ -9,14 +9,14 @@ keywords = ["bevy", "perception", "gamedev"]
 categories = ["game-development"]
 
 [dependencies]
-bevy = { version = "0.18", default-features = false }
+bevy = { version = "0.19", default-features = false }
 serde = { version = "1", features = ["derive"], optional = true }
 
 [features]
 serde = ["dep:serde"]
 
 [dev-dependencies]
-criterion = { version = "0.5", features = ["html_reports"] }
+criterion = { version = "0.8", features = ["html_reports"] }
 ron = "0.12"
 
 [[bench]]
