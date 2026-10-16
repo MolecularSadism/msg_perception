@@ -74,6 +74,7 @@ The plugin exposes `PerceptionSystems::Decay`, `PerceptionSystems::Propagate` an
 
 | `msg_perception` | Bevy   |
 |-----------------|--------|
+| 0.4             | 0.19   |
 | 0.1 – 0.3       | 0.18   |
 
 ## License
