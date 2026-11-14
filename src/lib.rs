@@ -101,7 +101,8 @@ impl<
 /// With the `serde` feature enabled the config derives `Serialize`/
 /// `Deserialize` with per-field defaults, so host apps can embed it in their
 /// own config assets.
-#[derive(Resource, Clone, Debug)]
+#[derive(Resource, Reflect, Clone, Debug)]
+#[reflect(Resource, Default)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -268,7 +269,8 @@ impl<P: Percept> Memory<P> {
 /// The propagation system finds all [`Memory`] holders within `range`
 /// and inserts a [`MemoryEntry`] with intensity attenuated by distance.
 /// When `source` matches the perceiving entity, the stimulus is ignored.
-#[derive(Message, Debug, Clone)]
+#[derive(Message, Reflect, Debug, Clone)]
+#[reflect(Message)]
 pub struct PerceptionMessage<P: Percept> {
     /// The perceived stimulus.
     pub percept: P,
@@ -287,7 +289,8 @@ pub struct PerceptionMessage<P: Percept> {
 ///
 /// Used for direct stimuli (e.g. pain) where only the targeted entity should
 /// receive the memory, with no spatial propagation or distance attenuation.
-#[derive(EntityEvent, Debug, Clone)]
+#[derive(EntityEvent, Reflect, Debug, Clone)]
+#[reflect(Event)]
 pub struct PerceptionEvent<P: Percept> {
     /// The entity receiving the perception.
     pub entity: Entity,
@@ -384,6 +387,8 @@ impl<P: Percept> Plugin for PerceptionPlugin<P> {
         app.register_type::<LocationKnowledge>();
         app.register_type::<MemoryEntry<P>>();
         app.register_type::<Memory<P>>();
+        app.register_type::<PerceptionMessage<P>>();
+        app.register_type::<PerceptionEvent<P>>();
         app.init_resource::<PerceptionConfig>();
         app.add_message::<PerceptionMessage<P>>();
 
